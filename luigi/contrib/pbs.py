@@ -199,7 +199,6 @@ class PBSJobTask(luigi.Task):
 
     stdout = 'blank'
     stderr = 'blank'
-    _completed = False
 
 
     def _fetch_task_failures(self):
@@ -278,7 +277,6 @@ class PBSJobTask(luigi.Task):
                 else:
                     logger.info('Job is done')
                     self.failed = False
-                    self._completed = True
                 break
             else:
                 logger.info('Job status is UNKNOWN!')
@@ -287,7 +285,7 @@ class PBSJobTask(luigi.Task):
 
 
     def complete(self):
-        return self._completed
+        return all([exists(f) for f in [self.stderr, self.stdout]])
 
 
 
