@@ -178,11 +178,13 @@ class PBSJobTask(luigi.Task):
     n_cpu = luigi.IntParameter(default=16, significant=False)
     memory = luigi.IntParameter(default=32, significant=False,
                                 description="Memory in Gb to be requested.")
-    project = luigi.Parameter()
-    walltime = luigi.Parameter(description="Requested job time in HH:MM:SS.")
+    project = luigi.Parameter(significant=False)
+    walltime = luigi.Parameter(significant=False,
+                               description="Requested job time in HH:MM:SS.")
     queue = luigi.Parameter(default='normal', significant=False,
                             description='The queue to submit the job into')
-    job_script = luigi.Parameter(description=("Full file path name to the "
+    job_script = luigi.Parameter(significant=False,
+                                 description=("Full file path name to the "
                                               "script that qsub will execute."))
     job_name = luigi.Parameter(significant=False, default=None,
                                description="Explicit job name given via qsub.")
@@ -190,10 +192,14 @@ class PBSJobTask(luigi.Task):
                                    description=("Specify the wait time to "
                                                 "poll qstat for the job "
                                                 "status."))
-    log_directory = luigi.Parameter()
+    log_directory = luigi.Parameter(significant=False)
     # job_name_format = luigi.Parameter(
     #     significant=False, default=None, description="A string that can be "
     #     "formatted with class variables to name the job with qsub.")
+
+    stdout = 'blank'
+    stderr = 'blank'
+    _completed = False
 
 
     def _fetch_task_failures(self):
@@ -272,11 +278,17 @@ class PBSJobTask(luigi.Task):
                 else:
                     logger.info('Job is done')
                     self.failed = False
+                    self._completed = True
                 break
             else:
                 logger.info('Job status is UNKNOWN!')
                 logger.info('Status is : %s' % pbs_status)
                 raise Exception("job status isn't one of ['R', 'Q', 'H', 'S', 'E', 'F']: %s" % pbs_status)
+
+
+    def complete(self):
+        return self._completed
+
 
 
 # class LocalSGEJobTask(SGEJobTask):
