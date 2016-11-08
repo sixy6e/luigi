@@ -151,7 +151,7 @@ def _build_qsub_command(job_name, stdout=None, stderr=None, project=None,
            '-e', stderr,
            '-P', project,
            '-q', queue,
-           '-l', lspec.format(walltime=walltime, mem=memory, ncpus=ncpus),
+           '-l', lspec.format(walltime=walltime, memory=memory, ncpus=ncpus),
            '-N', job_name,
            '{}'.format(job_script)]
     return cmd
@@ -175,24 +175,25 @@ class PBSJobTask(luigi.Task):
         string passed to qsub; e.g. "Task123_{task_family}_{n_cpu}...".
     """
 
-    n_cpu = luigi.IntParameter(default=16, significant=False)
-    memory = luigi.IntParameter(default=32, significant=False,
+    name = luigi.IntParameter()
+    n_cpu = luigi.IntParameter(default=16, significant=False, positional=False)
+    memory = luigi.IntParameter(default=32, significant=False, positional=False,
                                 description="Memory in Gb to be requested.")
-    project = luigi.Parameter(significant=False)
-    walltime = luigi.Parameter(significant=False,
+    project = luigi.Parameter(significant=False, positional=False)
+    walltime = luigi.Parameter(significant=False, positional=False,
                                description="Requested job time in HH:MM:SS.")
-    queue = luigi.Parameter(default='normal', significant=False,
+    queue = luigi.Parameter(default='normal', significant=False, positional=False,
                             description='The queue to submit the job into')
-    job_script = luigi.Parameter(significant=False,
+    job_script = luigi.Parameter(significant=False, positional=False,
                                  description=("Full file path name to the "
                                               "script that qsub will execute."))
-    job_name = luigi.Parameter(significant=False, default=None,
+    job_name = luigi.Parameter(significant=False, default=None, positional=False,
                                description="Explicit job name given via qsub.")
-    poll_time = luigi.IntParameter(significant=False, default=POLL_TIME,
+    poll_time = luigi.IntParameter(significant=False, default=POLL_TIME, positional=False,
                                    description=("Specify the wait time to "
                                                 "poll qstat for the job "
                                                 "status."))
-    log_directory = luigi.Parameter(significant=False)
+    log_directory = luigi.Parameter(significant=False, positional=False)
     # job_name_format = luigi.Parameter(
     #     significant=False, default=None, description="A string that can be "
     #     "formatted with class variables to name the job with qsub.")
@@ -229,7 +230,7 @@ class PBSJobTask(luigi.Task):
                                          self.walltime, self.memory,
                                          self.queue, self.n_cpu,
                                          self.job_script)
-        logger.debug('qsub command: \n' + submit_cmd)
+        #logger.debug('qsub command: \n' + submit_cmd)
 
         # Submit the job and grab job ID
         qsub_output = subprocess.check_output(submit_cmd)
