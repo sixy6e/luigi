@@ -198,9 +198,6 @@ class PBSJobTask(luigi.Task):
     #     significant=False, default=None, description="A string that can be "
     #     "formatted with class variables to name the job with qsub.")
 
-    stdout = 'blank'
-    stderr = 'blank'
-
 
     def _fetch_task_failures(self):
         # TODO: catch if we have no stdout file.
@@ -278,16 +275,15 @@ class PBSJobTask(luigi.Task):
                 else:
                     logger.info('Job is done')
                     self.failed = False
+                    self.work()
                 break
             else:
                 logger.info('Job status is UNKNOWN!')
                 logger.info('Status is : %s' % pbs_status)
                 raise Exception("job status isn't one of ['R', 'Q', 'H', 'S', 'E', 'F']: %s" % pbs_status)
 
-
-    def complete(self):
-        return all([exists(f) for f in [self.stderr, self.stdout]])
-
+    def work(self):
+        pass
 
 
 # class LocalSGEJobTask(SGEJobTask):
